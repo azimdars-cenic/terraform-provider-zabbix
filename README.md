@@ -2,8 +2,6 @@
 
 A [Terraform](terraform.io) provider for [Zabbix](https://www.zabbix.com)
 
-<img src="https://cdn.rawgit.com/hashicorp/terraform-website/master/content/source/assets/images/logo-hashicorp.svg" width="600px">
-
 <img src="https://assets.zabbix.com/img/logo/zabbix_logo_500x131.png" width="500px">
 
 # Index

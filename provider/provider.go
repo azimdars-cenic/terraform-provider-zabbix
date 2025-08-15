@@ -6,7 +6,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/validation"
 	"github.com/hashicorp/terraform/helper/hashcode"
-	"github.com/tpretz/go-zabbix-api"
+	"github.com/azimdars-cenic/go-zabbix-api"
 )
 
 // Provider definition
@@ -122,20 +122,30 @@ func providerConfigure(d *schema.ResourceData) (meta interface{}, err error) {
 	log.Trace("Started zabbix provider init")
 	l := logger.New(stderr, "[DEBUG] ", logger.LstdFlags)
 
-	api := zabbix.NewAPI(zabbix.Config{
+	api, err := zabbix.NewAPI(zabbix.Config{
 		Url:         d.Get("url").(string),
 		TlsNoVerify: d.Get("tls_insecure").(bool),
 		Log:         l,
 		Serialize:   d.Get("serialize").(bool),
 	})
 
-	var version int64
-	version, err = getApiVersion(api)
 	if err != nil {
-		return
+		return nil, err
 	}
 
-	api.Config.Version = int(version)
+	// Query API version string (e.g. "6.4.0") and store major version as int.
+	verStr, err := api.Version()
+	if err != nil {
+		return nil, err
+	}
+	parts := strings.SplitN(verStr, ".", 2)
+	major := 0
+	if len(parts) > 0 {
+		if v, convErr := strconv.Atoi(parts[0]); convErr == nil {
+			major = v
+ 		}
+ 	}
+ 	api.Config.Version = major
 
 	if token, ok := d.GetOk("api_token"); ok {
 		api.Auth = token.(string)
